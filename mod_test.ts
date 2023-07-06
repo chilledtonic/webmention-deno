@@ -1,4 +1,4 @@
-import { getEndpoint } from "./mod.ts";
+import { getEndpoint, webmention } from "./mod.ts";
 import { MockFetch } from "https://deno.land/x/deno_mock_fetch@1.0.1/mod.ts";
 
 const mf = new MockFetch();
@@ -21,3 +21,33 @@ Deno.test("getEndpoint should return an endpoint URL from within the HTTP Link H
   console.log(endpoint);
   assertEquals(endpoint, expectedEndpoint);
 });
+
+Deno.test("Webmention fires correctly", async () => {
+  const source = "https://webmention.test/source";
+  const target = "https://webmention.test/target"
+  const endpoint = "https://webmention.test/webmention";
+
+  mf.intercept(target, { method: "GET" }).response("ok", {
+    status: 200,
+    headers: { "Link": `<${endpoint}>; rel="webmention"` },
+  });
+
+  mf.intercept(endpoint, { method: "POST" }).response("ok", {
+    status: 202,
+  });
+
+  const result = await webmention(source, target);
+  console.log(result)
+  assertEquals(result?.status, 202);
+
+});
+
+// POST /webmention-endpoint HTTP/1.1
+// Host: aaronpk.example
+// Content-Type: application/x-www-form-urlencoded
+
+// source=https://waterpigs.example/post-by-barnaby&
+// target=https://aaronpk.example/post-by-aaron
+
+
+// HTTP/1.1 202 Accepted
