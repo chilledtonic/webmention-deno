@@ -22,7 +22,7 @@ Deno.test("getEndpoint should return an endpoint URL from within the HTTP Link H
   assertEquals(endpoint, expectedEndpoint);
 });
 
-Deno.test("Webmention fires correctly", async () => {
+Deno.test("Webmention gets endpoint & fires correctly", async () => {
   const source = "https://webmention.test/source";
   const target = "https://webmention.test/target"
   const endpoint = "https://webmention.test/webmention";
